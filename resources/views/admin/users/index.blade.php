@@ -38,7 +38,7 @@
 			</div>
 		</nav>
 		<!-- DropDown For User File Import to DataBase-->
-		<nav class="navbar navbar-expand-lg navbar-light bg-light" style="float: left;">
+		{{--<nav class="navbar navbar-expand-lg navbar-light bg-light" style="float: left;">
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav mr-auto">
 					<li class="nav-item dropdown">
@@ -51,7 +51,19 @@
 					</li>
 				</ul>
 			</div>
-		</nav>
+		</nav>--}}
+		<div style="margin-top: -5px;">
+			<form action = "{{ route('importUser.excel') }}" method="POST" enctype="multipart/form-data">
+				@csrf
+				<input type="file" name="file">
+				<button type="submit" class="btn btn-info">Import</button>
+			</form>
+		</div>
+		@if(isset($errors) && $errors->any())
+			@foreach($errors->all() as $error)
+			   <h5 class="lead" style="color: red">{{ $error }}</h5>
+			@endforeach
+		@endif
 		<table class="table">
 			<thead>
 				<tr>

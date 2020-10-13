@@ -1,16 +1,28 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Imports\UsersImport;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class UsersImportController extends Controller
 {
-	public function import()
+	public function import(Request $request)
     {
-        Excel::queueImport(new UsersImport, 'users_import.xlsx');
-        return redirect()->back()->with('success', 'USer Data Export successFuly');
+		try{
+			$filePath = $request->file('file')->store('ImportData');
+
+			DB::table('import_files')->insert([
+				'user_id' => auth()->id(),
+				'filepath' => $filePath,
+			]);
+
+			return redirect()->back()->with('success', 'File uploaded successfully');
+
+		}catch (\Exception $e){
+			return redirect()->back()->with('danger', $e->getMessage());
+
+		}
     }
 
 }
+

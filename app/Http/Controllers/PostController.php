@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Mail\TestingMail;
+use App\Notifications\PostNotification;
 use Illuminate\Http\Request;
 use App\Category;
 use App\Post;
@@ -18,7 +19,7 @@ class PostController extends Controller
     {
     	$posts = Post::all();
     	$categories = Category::all();
-        return view('pages.posts.index',compact('categories','$posts'));
+        return view('pages.posts.index',compact('categories','posts'));
     }
 
     /**
@@ -70,7 +71,11 @@ class PostController extends Controller
         }
         $postData['descripton'] = $dom->saveHTML();
     	try {
-    		Post::create(array_merge( $request->except('_token', 'files'), $postData ));
+    		$posts = Post::create(array_merge( $request->except('_token', 'files'), $postData ));
+    		/*Send mail with notification to user*/
+
+    		auth()->user()->notify(new PostNotification($request->title));
+
     		return redirect()->back()->with('success','Post submitted successfully ,Wait for approval');
     	} catch (Exception $e) {
     		return redirect()->back()->with('danger',$e->getMessage());

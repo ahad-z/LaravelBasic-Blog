@@ -3,10 +3,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Mail\TestingMail;
 use Carbon\Carbon;
-use Auth;
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\User;
-use Session;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
+use Str;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
 class UserController extends Controller
 {
@@ -58,7 +61,6 @@ class UserController extends Controller
 			    'verifyEmail', now()->addMinutes(5), ['email' => $request->email]
 			);
 			Mail::to($request->email)->send(new TestingMail($verURL));
-
 			return redirect()->back()->with('success', 'Your verification link sent your mail.');
 		} catch (\Exception $e) {
 
@@ -72,14 +74,11 @@ class UserController extends Controller
 		$verified = User::whereEmail($request->email)->where('email_verified_at', '!=', NULL)->first();
 		$credentials = $request->except(['_token']);
 		if($verified){
-
 			if (auth()->attempt($credentials)) {
-
-			return redirect()->route('users.dashboard');
-
-		}else{
-			return redirect()->back()->with('danger',"Sorry Your mail or password Doesn't Find");
-		}
+				return redirect()->route('users.dashboard');
+			}else{
+				return redirect()->back()->with('danger',"Sorry Your mail or password Doesn't Find");
+			}
 		}else{
 			return redirect()->back()->with('danger',"Your account Doesn't verified!");
 		}
@@ -223,9 +222,125 @@ class UserController extends Controller
 
 		} catch (Exception $e) {
 
-			  return redirect()->back()->with('danger','Somethimg Went Wrong!');
+			  return redirect()->back()->with('danger','Something Went Wrong!');
 
 		}
+
+	}
+	public function github()
+	{
+		//send the user to github
+		return Socialite::driver('github')->redirect();
+
+
+	}
+	public function githubRedirect()
+	{
+		try {
+			// get back form github
+			$socialUser = Socialite::driver('github')->user();
+			$user = User::where('email',$socialUser->getEmail())->first();
+			if($user){
+				Auth::login($user,true);
+				return redirect('BasicRecap/admin/users/dashboard');
+			}else{
+				$user = User::create([
+					'name' => $socialUser->getNickname(),
+					'email' => $socialUser->getEmail(),
+					'password' => Hash:: make(Str::random(24))
+				]);
+				Auth::login($user,true);
+				return redirect('BasicRecap/admin/users/dashboard');
+			}
+
+		}catch (\Exception $e) {
+			dd($e);
+			return redirect('BasicRecap/admin/users/create');
+		}
+
+	}
+	public function facebook()
+	{
+		// We send user to facebook
+		return Socialite::driver('facebook')->redirect();
+
+	}
+	public function facebookRedirect()
+	{
+		try {
+			// get back form facebook
+			$socialUser = Socialite::driver('facebook')->user();
+			$user = User::whereEmail($socialUser->getEmail())->first();
+			$name = $socialUser->getName();
+			$nickName = $socialUser->getNickname();
+
+			if($name){
+
+			}else{
+
+				$name = $nickName;
+			}
+
+			if($user){
+				Auth::login($user,true);
+				return redirect('BasicRecap/admin/users/dashboard');
+			}else{
+				$user = User::create([
+					'name' =>$name,
+					'email' => $socialUser->getEmail(),
+					'password' => Hash:: make(Str::random(24))
+				]);
+				Auth::login($user,true);
+				return redirect('BasicRecap/admin/users/dashboard');
+			}
+
+		}catch (\Exception $e) {
+			dd($e);
+			return redirect('BasicRecap/admin/users/create');
+		}
+
+
+	}
+	public function google()
+	{
+		// We send user to facebook
+		return Socialite::driver('google')->redirect();
+
+	}
+	public function googleRedirect()
+	{
+		try {
+			// get back form facebook
+			$socialUser = Socialite::driver('google')->user();
+			$user = User::whereEmail($socialUser->getEmail())->first();
+			$name = $socialUser->getName();
+			$nickName = $socialUser->getNickname();
+
+			if($name){
+
+			}else{
+
+				$name = $nickName;
+			}
+
+			if($user){
+				Auth::login($user,true);
+				return redirect('BasicRecap/admin/users/dashboard');
+			}else{
+				$user = User::create([
+					'name' =>$name,
+					'email' => $socialUser->getEmail(),
+					'password' => Hash:: make(Str::random(24))
+				]);
+				Auth::login($user,true);
+				return redirect('BasicRecap/admin/users/dashboard');
+			}
+
+		}catch (\Exception $e) {
+			dd($e);
+			return redirect('BasicRecap/admin/users/create');
+		}
+
 
 	}
 

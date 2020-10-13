@@ -14,9 +14,12 @@
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^6.3",
         "laravel/framework": "^7.24",
+        "laravel/nexmo-notification-channel": "^2.4",
+        "laravel/socialite": "^5.0",
         "laravel/tinker": "^2.0",
         "maatwebsite/excel": "^3.1",
-        "nesbot/carbon": "^2.39"
+        "nesbot/carbon": "^2.39",
+        "spatie/laravel-permission": "^3.17"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

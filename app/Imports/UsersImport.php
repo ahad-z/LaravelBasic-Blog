@@ -2,22 +2,19 @@
 namespace App\Imports;
 use App\User;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class UsersImport implements ToModel, WithHeadingRow, WithChunkReading
+class UsersImport implements ToModel, WithHeadingRow, WithChunkReading,WithValidation,SkipsOnError,ShouldQueue
 {
-    /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
     public function model(array $row)
     {
         return new User([
-           'name'     	=> $row['name'],
+           'name'     => $row['name'],
            'email'    => $row['email'],
            'password' => Hash::make('password'),
            'created_at' => $row['added_time']
@@ -28,4 +25,16 @@ class UsersImport implements ToModel, WithHeadingRow, WithChunkReading
     {
         return 10;
     }
+
+	public function rules(): array
+	{
+		return [
+			'.*' => ['email', 'unique:users,email']
+
+		];
+	}
+	public function onError(\Throwable $e)
+	{
+
+	}
 }

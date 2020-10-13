@@ -19,7 +19,7 @@ class CreatePostsTable extends Migration
             $table->string('cat_id');
             $table->string('title');
             $table->string('descripton');
-            $table->string('image');
+            $table->string('files');
             $table->string('status')->default('0');
             $table->timestamps();
         });

@@ -86,7 +86,7 @@
 					<div class="card-body">
 						<div class="row">
 						@foreach($categories as $category)
-							<div class="col-lg-8">
+							<div class="col-lg-6">
 								<ul class="list-unstyled mb-0">
 									<li>
 										<a style="text-decoration: none;" href="{{ route('home') }}?cat_id={{ $category->id }}">{{ $category->category }}<span> ({{ $category->posts->count() }})</span></a>
