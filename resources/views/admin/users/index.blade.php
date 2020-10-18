@@ -1,4 +1,7 @@
 @extends('layout.master')
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+@endpush
 @section('content')
 <!-- Search Widget -->
 <div class="card my-4">
@@ -71,6 +74,7 @@
 					<th>Name</th>
 					<th>Email</th>
 					<th>Type</th>
+					<th>Role</th>
 					<th>Action</th>
 				</tr>
 			</thead>
@@ -81,6 +85,14 @@
 						<td>{{ $user->name }}</td>
 						<td>{{ $user->email }}</td>
 						<td>{{ ucfirst($user->type) }}</td>
+						<td>
+							@foreach($user->roles as $role)
+								<span class="badge badge-info mr-2" style="font-size:12px;">
+									{{ucfirst($role->name)}}
+								</span>
+							@endforeach
+
+						</td>
 						<td>
 							<div class="btn-group">
 							   <a href="#" class="btn btn-info btn-sm" data-target="#edituser_{{$user->id}}" data-toggle="modal">Edit</a>
@@ -142,6 +154,14 @@
 						</select>
 					</div>
 					<div class="form-group">
+						<label for="roles">Assign Roles</label>
+						<select class="form-control select2" multiple name="roles[]" style="width:200px;">
+							@foreach($roles as $role )
+							<option value="{{ $role->id }}">{{ $role->name }}</option>
+							@endforeach
+						</select>
+					</div>
+					<div class="form-group">
 						<button type="submit" class="btn btn-primary">Save</button>
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 					</div>
@@ -182,6 +202,14 @@
 								</select>
 							</div>
 							<div class="form-group">
+								<label for="role">Role</label>
+								<select class="form-control select2" multiple name="roles[]" style="width:200px;">
+									@foreach($roles as $role )
+									<option value="{{ $role->id }}" {{ $user->hasRole($role->id) ? 'selected' : '' }}>{{ $role->name }}</option>
+									@endforeach
+								</select>
+							</div>
+							<div class="form-group">
 								<button type="submit" class="btn btn-primary">Update</button>
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 							</div>
@@ -192,9 +220,12 @@
 		</div>
 	@endforeach
 @endsection
+
 @push('scripts')
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 	<script>
 		$(document).ready(function () {
+		    $('.select2').select2();
 			$('body').on('keyup', '#searchuser', function () {
 				let searchContent = $(this).val();
 				$.ajax({

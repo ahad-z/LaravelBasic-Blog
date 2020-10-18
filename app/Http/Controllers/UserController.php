@@ -11,6 +11,8 @@ use Laravel\Socialite\Facades\Socialite;
 use Str;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 class UserController extends Controller
 {
 	/**
@@ -128,7 +130,9 @@ class UserController extends Controller
 	public function update(Request $request, $id)
 	{
 		try {
-			User::find($id)->update($request->except('_token'));
+			$user = User::find($id);
+			$user->update($request->except('_token','roles'));
+			$user->syncRoles($request->roles);
 			return redirect()->back()->with('success','User update successfully!');
 
 		} catch (Exception $e) {
@@ -202,28 +206,33 @@ class UserController extends Controller
 	public function usersIndex()
 	{
 		$users = User::paginate(50);
-		return view('admin.users.index',compact('users'));
+		$roles = Role::all();
+		return view('admin.users.index',compact('users', 'roles'));
 
 	}
 	public function usersCreate(Request $request)
 	{
+
 		$mytime = Carbon::now();
 	    $currentDate = $mytime->toDateTimeString();
-		try {
+	    
 
-			User::create(array_merge(
-				$request->except('_token','password'),
+		try {
+			$user = User::create(array_merge(
+				$request->except('_token','password', 'roles'),
 				[
 					'password'          => bcrypt($request->password),
 					'email_verified_at' => $currentDate
-			   ]
+			    ]
 			));
+
+			if($request->roles){
+		   		$user->assignRole($request->roles);
+		    }
 		   return redirect()->back()->with('success','User Added successfully!');
 
 		} catch (Exception $e) {
-
 			  return redirect()->back()->with('danger','Something Went Wrong!');
-
 		}
 
 	}
@@ -340,7 +349,6 @@ class UserController extends Controller
 			dd($e);
 			return redirect('BasicRecap/admin/users/create');
 		}
-
 
 	}
 

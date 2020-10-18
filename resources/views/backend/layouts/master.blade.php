@@ -9,7 +9,9 @@
 	<meta name="csrf-token" content="{{ csrf_token() }}">
      @include('backend.layouts.partials.style')
 	<!-- modernizr css -->
-	<script src="{{ asset('backend/assets/js/vendor/modernizr-2.8.3.min.js') }}"></script>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="{{ asset('backend/assets/js/vendor/modernizr-2.8.3.min.js') }}"></script>
+    
 </head>
 @stack('styles')
 
@@ -54,6 +56,15 @@
 			'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 		}
 	});
+	$(document).ready(function(){
+  			@if (session()->has('success'))
+				toastr.success(`{{ session()->get('success') }}`)
+			@elseif (session()->has('error'))
+				toastr.error(`{{ session()->get('error') }}`)
+			@elseif(session()->has('warning'))
+				toastr.warning(`{{ session()->get('warning') }}`)	
+  			@endif
+  		});
 </script>
 
 @stack('scripts')

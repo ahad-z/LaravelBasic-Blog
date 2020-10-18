@@ -19,10 +19,7 @@ class RolesController extends Controller
     public function create()
     {
 		$permissions = Permission::all();
-
 		$groups = collect($permissions)->groupBy('group_name');
-
-
 		return view('backend.pages.roles.create',compact('permissions', 'groups'));
     }
 
@@ -56,7 +53,6 @@ class RolesController extends Controller
 
 		}catch (\Exception $e){
 			DB::rollBack();
-
 			return response()->json([
 				'status' => false,
 				'message' => $e->getMessage()
@@ -72,16 +68,61 @@ class RolesController extends Controller
 
     public function edit($id)
     {
-        //
+    	if (auth()->user()->can('post.create')) {
+    		$role = Role::findById($id);
+	        $permissions = Permission::all();
+			$groups = collect($permissions)->groupBy('group_name');
+			$groupName = $groups->keys();
+	   		/*return $role->permissions->where('group_name', $groupName)->count();*/
+			return view('backend.pages.roles.edit', compact('role', 'permissions', 'groups'));
+    	}else{
+			return redirect()->back()->with('warning', 'Youre not authorized to perform the action.');
+    	}
+    	
     }
 
     public function update(Request $request, $id)
     {
-        //
+
+        $validator = CustomValidator::validate($request, [
+			'role' => 'required|unique:roles,name,'.$id
+		]);
+
+		if($validator !== true) {
+			return $validator;
+		}
+		try {
+			$role = Role::findById($id);
+
+			 Role::where('id',$id)->update(['name' => $request->role]);
+
+			if(!empty($request->permissions)){
+				$role->syncPermissions(
+					collect($request->permissions)->keys()->all()
+				);
+			}
+
+			return redirect()->back()->with('success', 'Role Updated successfully!');
+
+		}catch (\Exception $e){
+
+			return redirect()->back()->with('warning', $e->getMessage());
+			
+		}
     }
 
-    public function destroy($id)
+    public function destroy(Role $role)
     {
-        //
+    	if (auth()->user()->can('post.delete')) {
+    		try {
+				$role->delete();
+				return redirect()->back()->with('success', 'Role Deleted successfully!');
+			}catch (\Exception $e){
+				return redirect()->back()->with('warning', $e->getMessage());
+			}
+    	}else{
+			return redirect()->back()->with('warning', 'Youre not authorized to perform the action.');
+    	}
+    	
     }
 }

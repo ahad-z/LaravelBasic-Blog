@@ -23,7 +23,11 @@
 					</div>
 					<div class="card-footer text-muted">
 						Posted on {{ $post->created_at->diffForHumans() .' | '. $post->created_at->format('F d, Y') }} by
-						<a href="#">{{ $post->user->name }}</a>
+						<a href="#">
+							@if($post->user)
+								{{ $post->user->name }}
+							@endif
+						</a>
 						<small style="color: green">{{ $post->Category->category }}</small>
 					</div>
 					<!-- For Comment -->

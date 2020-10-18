@@ -91,12 +91,14 @@
 			<div class="card">
 				<div class="card-body">
 					<h4 class="header-title">Roles List</h4>
+					<a style="float: right; " href="{{ route('roles.create') }}" class="btn btn-primary text-white mb-2" >Create Role</a>
 					<div class="data-tables datatable-dark">
 						<table id="dataTable3" class="text-center">
 							<thead class="text-capitalize">
 							<tr>
 								<th>Sl</th>
-								<th>Name</th>
+								<th>Role Name</th>
+								<th width="350px">Permissions</th>
 								<th>Action</th>
 							</tr>
 							</thead>
@@ -104,11 +106,22 @@
 							@foreach($roles as $role)
 							<tr>
 								<td>{{ $loop->iteration  }}</td>
-								<td>{{ $role->name }}</td>
+								<td>{{ucfirst($role->name)  }}</td>
+								<td>
+									@foreach($role->permissions as $permission)
+										<span class="badge badge-info mr-2" style="font-size:12px;">
+											 {{ucfirst($permission->name)}}
+										</span>
+								    @endforeach
+								</td>
 								<td>
 									<div class="btn btn-group">
-										<button class="btn btn-success">Edit</button>
-										<button class="btn btn-danger">Delete</button>
+										<a href="{{ route('roles.edit',$role->id ) }}" class="btn btn-success" >Edit</a>
+										<button onclick="document.getElementById('deleteRole{{ $role->id }}').submit()" class="btn btn-danger">Delete</button>
+										<form method="post" action="{{ route('roles.destroy', $role->id) }}" id="deleteRole{{ $role->id }}">
+											@method('DELETE')
+											@csrf
+										</form>
 									</div>
 								</td>
 							</tr>
@@ -149,6 +162,6 @@
 				responsive: true
 			});
 		}
-
+	
 	</script>
 @endpush

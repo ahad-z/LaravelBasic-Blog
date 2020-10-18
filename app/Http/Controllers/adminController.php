@@ -9,6 +9,5 @@ class adminController extends Controller
     public function index(){
 
      return view('backend.pages.dashboard.index');
-
 	}
 }
